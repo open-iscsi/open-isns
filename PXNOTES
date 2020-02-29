@@ -1,0 +1,4 @@
+* px using version 0.100 as base
+./configure CFLAGS='-g -O2' --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64
+make
+make install_hdrs install_lib
