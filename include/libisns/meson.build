@@ -1,7 +1,7 @@
 # meson build control file for open-isns public include files
 
 inc_conf = configuration_data()
-inc_conf.set('RUNDIR', run_dir)
+inc_conf.set('RUNDIR', get_option('rundir'))
 
 static_hdr_files = files([
   'attrs.h',

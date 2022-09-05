@@ -19,11 +19,6 @@ cc = meson.get_compiler('c')
 security_dep = dependency('libcrypto', required: get_option('security'))
 slp_dep = cc.find_library('slp', required: get_option('slp'))
 
-# get directory name override options
-systemd_unit_dir = get_option('systemddir') / 'system'
-sbin_dir = get_option('sbindir')
-run_dir = get_option('rundir')
-
 subdir('tests')
 subdir('doc')
 subdir('etc')
@@ -127,6 +122,8 @@ libisns_dep = declare_dependency(link_with: libisns_lib)
 
 our_dependencies = [config_dep, security_dep, libisns_dep, slp_dep]
 
+sbin_dir = get_option('sbindir')
+
 executable('isnsd',
   sources: files('isnsd.c'),
   include_directories: incl_dirs,
@@ -184,7 +181,7 @@ install_data(config_files,
 # systemd service files
 #
 install_data(files(['isnsd.service', 'isnsd.socket']),
-  install_dir: systemd_unit_dir)
+  install_dir: get_option('systemddir') / 'system')
 
 #
 # our package file
