@@ -2,6 +2,7 @@
 
 inc_conf = configuration_data()
 inc_conf.set('RUNDIR', get_option('rundir'))
+inc_conf.set('VERSION', meson.project_version())
 
 static_hdr_files = files([
   'attrs.h',

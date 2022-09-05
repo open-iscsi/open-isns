@@ -621,6 +621,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+VERSION
 RUNDIR
 ENABLE_STATIC
 ENABLE_SHARED
@@ -4471,6 +4472,8 @@ $as_echo "$as_me: WARNING: *** You have not enabled versioned symbols." >&2;}
 	fi
 
 fi
+
+VERSION=0.101
 
 
 
