@@ -24,5 +24,4 @@ configure_file(
   install: true,
   install_dir: get_option('includedir') / 'libisns')
 
-install_headers(static_hdr_files,
-  install_dir: get_option('includedir') / 'libisns')
+install_headers(static_hdr_files, subdir: 'libisns')
