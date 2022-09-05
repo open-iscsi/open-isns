@@ -29,25 +29,26 @@ struct isns_slp_url_state {
 };
 
 static void
-isns_slp_report(SLPHandle handle, SLPError err, void *cookie)
+isns_slp_report(__attribute__((unused))SLPHandle handle,
+		SLPError err, void *cookie)
 {
 	*(SLPError *) cookie = err;
 }
 
 /*
  * Register a service with SLP
- */ 
+ */
 int
 isns_slp_register(const char *url)
 {
-	SLPError	err, callbackerr; 
-	SLPHandle	handle = NULL; 
+	SLPError	err, callbackerr;
+	SLPHandle	handle = NULL;
 
-	err = SLPOpen("en", SLP_FALSE, &handle); 
-	if(err != SLP_OK) { 
+	err = SLPOpen("en", SLP_FALSE, &handle);
+	if(err != SLP_OK) {
 		isns_error("Unable to obtain SLP handle (err %d)\n", err);
 		return 0;
-	} 
+	}
 
 	err = SLPReg(handle, url, SLP_LIFETIME_MAXIMUM,
 			ISNS_SLP_SCOPE,
@@ -69,20 +70,20 @@ isns_slp_register(const char *url)
 
 /*
  * DeRegister a service
- */ 
+ */
 int
 isns_slp_unregister(const char *url)
 {
-	SLPError	err, callbackerr; 
-	SLPHandle	handle = NULL; 
+	SLPError	err, callbackerr;
+	SLPHandle	handle = NULL;
 
 	isns_debug_general("SLP: Unregistering \"%s\"\n", url);
 
-	err = SLPOpen("en", SLP_FALSE, &handle); 
-	if(err != SLP_OK) { 
+	err = SLPOpen("en", SLP_FALSE, &handle);
+	if(err != SLP_OK) {
 		isns_error("Unable to obtain SLP handle (err %d)\n", err);
 		return 0;
-	} 
+	}
 
 	err = SLPDereg(handle, url, isns_slp_report, &callbackerr);
 
@@ -102,9 +103,11 @@ isns_slp_unregister(const char *url)
  * Find an iSNS server through SLP
  */
 static SLPBoolean
-isns_slp_url_callback(SLPHandle handle,
-		const char *url, unsigned short lifetime,
-		SLPError err, void *cookie) 
+isns_slp_url_callback(__attribute__((unused))SLPHandle handle,
+		const char *url,
+		__attribute__((unused))unsigned short lifetime,
+		SLPError err,
+		void *cookie)
 {
 	struct isns_slp_url_state *sp = cookie;
 	SLPSrvURL	*parsed_url = NULL;
@@ -159,19 +162,19 @@ char *
 isns_slp_find(void)
 {
 	static struct isns_slp_url_state state;
-	SLPHandle	handle = NULL; 
-	SLPError	err; 
+	SLPHandle	handle = NULL;
+	SLPError	err;
 
 	if (state.slp_url)
 		return state.slp_url;
 
 	isns_debug_general("Using SLP to locate iSNS server\n");
 
-	err = SLPOpen("en", SLP_FALSE, &handle); 
-	if(err != SLP_OK) { 
+	err = SLPOpen("en", SLP_FALSE, &handle);
+	if(err != SLP_OK) {
 		isns_error("Unable to obtain SLP handle (err %d)\n", err);
 		return NULL;
-	} 
+	}
 
 	err = SLPFindSrvs(handle, ISNS_SLP_SERVICE_NAME,
 			NULL, "(protocols=isns)",
