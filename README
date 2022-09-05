@@ -102,26 +102,27 @@ meson.
 
       meson setup --help
 
+   One option of note is "--default-library={shared,static,both}". The
+   meson default is "shared".
+
    The project-specific options are set using -D<OPTION>=VALUE. OPTIONS
    are from. You can use 'meson configure' to see these project options:
 
-      security        feature [enabled]         use libcrypt for security
-      slp             feature [enabled]         use Service Location Protocol
-      shared          feature [disabled]        build a shared library
-      shared_version  feature [disabled]        use library versioning, if
+      security        feature [check]           use libcrypt for security
+      slp             feature [check]           use Service Location Protocol
+      shared_version  boolean [true]            use library versioning, if
                                                 building a shared library
-      static          feature [enabled]         build a static library
       systemddir      string [/usr/lib/systemd] location of systemd files
       rundir          string [/var/run]         where socket and pidfile go
 
-   e.g. one might run:
+   Thus, one might run:
 
-      meson setup -Dsecurity=disabled -Dshared=enabled -Drundir=/some/dir
+      meson setup --default-library=both -Dsecurity=disabled -Drundir=/some/dir
 
    Once meson has created and set up your "builddir" directory, you can
    actually build the code using ninja:
 
-           ninja -C builddir
+           ninja -C builddir [--verbose]
 
    Using autotools/make to Build open-isns [DEPRECATED]
    ----------------------------------------------------
@@ -184,7 +185,8 @@ On the iSNS server, you need to generate a server key and install it. The
 simplest way is probably to use the isnssetup script included in the
 source package.
 
-For each client you wish to use, you should then 
+For each client you wish to use, you should then register that key using
+the example setup script, or steps similar to those in the script.
 
 iSNS Security
 -------------
