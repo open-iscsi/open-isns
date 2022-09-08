@@ -1,3 +1,33 @@
+* Changes v0.101 to v0.102:
+
+Andrew Sayers (1):
+      Typo: s/overried/override/
+
+Lee Duncan (15):
+      Add a package config file for libisns.a
+      build: Remove these two files, no longer used
+      git: ignore all shared library files
+      meson builds now working
+      meson: Add ability to disable static library build
+      Add a decprecation warning to configure script.
+      meson: update README with meson info
+      meson: convert some args to 'features'
+      meson: fix error building shared lib with version
+      meson: several updates based on review
+      meson: small option usage cleanup
+      meson: update README
+      Fix two compiler warnings in slp.c
+      build: only specify version in one place
+      meson: just specify subdir for header-file install.
+
+Pavel I Volkov (1):
+      Removed bash-specific function definitions.
+
+Wenchao Hao (2):
+      isnsadm: Fix unparse command line options "-V" and "-r"
+      isnsd: socket: Make sure to create IPv6 socket default
+
+
 * Changes v0.100 to v0.101:
 
 Dmitry Bogdanov (1):
