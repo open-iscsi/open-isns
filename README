@@ -6,25 +6,25 @@ This is a partial implementation of iSNS, according to RFC4171.
 The implementation is still somewhat incomplete, but I'm releasing
 it for your reading pleasure.
 
-The distribution comprises
+The distribution comprises:
 
  isnsd
- 	This is the iSNS server, supporting persistent storage
-	of registrations in a file based database.
+        This is the iSNS server, supporting persistent storage
+        of registrations in a file based database.
 
  isnsadm
- 	A command line utility for querying the iSNS database,
-	and for registering/deregistering nodes and portals
+        A command line utility for querying the iSNS database,
+        and for registering/deregistering nodes and portals
 
  isnsdd
- 	An iSNS Discovery Daemon, which is still very much work
-	in progress. The daemon is supposed to handle all the
-	bit banging and server communications required to register
-	a node, its portals, and to maintain the registration.
-	It is also supposed to use the iSNS State Change Notification
-	framework to learn of new targets or initiators coming online,
-	and inform local services (such as the iSCSI initiator daemon)
-	about these changes.
+        An iSNS Discovery Daemon, which is still very much work
+        in progress. The daemon is supposed to handle all the
+        bit banging and server communications required to register
+        a node, its portals, and to maintain the registration.
+        It is also supposed to use the iSNS State Change Notification
+        framework to learn of new targets or initiators coming online,
+        and inform local services (such as the iSCSI initiator daemon)
+        about these changes.
 
 Thanks!
 -------
@@ -36,88 +36,140 @@ and his copious feedback!
 What works, after a fashion:
 ----------------------------
 
- -	For now, I've been focusing on getting the iSCSI part to
- 	work. There is some very basic support for FC objects, but
-	this will be hardly useful yet.
+ -      For now, I've been focusing on getting the iSCSI part to
+        work. There is some very basic support for FC objects, but
+        this will be hardly useful yet.
 
- -	Registration, deregistration, query, getnext
-	You can use isnsadm to register iSCSI nodes, and portals.
-	isnsadm also illustrates how this is supposed to be used from
-	the client perspective.
+ -      Registration, deregistration, query, getnext
+        You can use isnsadm to register iSCSI nodes, and portals.
+        isnsadm also illustrates how this is supposed to be used from
+        the client perspective.
 
- -	Discovery domains are supported mostly. The administrator
- 	can create discovery domains using isnsadm, and place storage
-	nodes in domains. Queries by clients are scoped by their
-	discovery domains membership, so that they will be unable to
-	see nodes not part of a shared DD.
+ -      Discovery domains are supported mostly. The administrator
+        can create discovery domains using isnsadm, and place storage
+        nodes in domains. Queries by clients are scoped by their
+        discovery domains membership, so that they will be unable to
+        see nodes not part of a shared DD.
 
-	Open-iSNS currently does not allow clients to place themselves
-	in a DD.
+        Open-iSNS currently does not allow clients to place themselves
+        in a DD.
 
-	Optionally, storage nodes that are not in any discovery domain
-	will be placed in a "default DD" (see the DefaultDiscoveryDomain
-	in isnsd.conf).
+        Optionally, storage nodes that are not in any discovery domain
+        will be placed in a "default DD" (see the DefaultDiscoveryDomain
+        in isnsd.conf).
 
- -	ESI, supported both by the server and the discovery daemon
+ -      ESI, supported both by the server and the discovery daemon
 
- -	SCN, supported by the server and the discovery daemon
+ -      SCN, supported by the server and the discovery daemon
 
 
 What is still missing
 ---------------------
 
- -	Better documentation (esp. a HOWTO on getting started with iSNS)
- -	DD Sets
- -	Various bits and pieces of the protocol
- -	FC support
+ -      Better documentation (esp. a HOWTO on getting started with iSNS)
+ -      DD Sets
+ -      Various bits and pieces of the protocol
+ -      FC support
 
 
 
 Building Open-iSNS
 ------------------
 
-The Open-iSNS build is now based on autoconf. The distributed tarball
-should include a configure script and a config.h.in file generated
-from configure.ac. If these are missing, you can generate them
-by running
+Currently we are transitioning to using 'meson' instead of
+autotools/autoconf. This means that, for now, both systems
+work. But autoconf will be deprecated, so please start using
+meson.
 
-	autoconf
-	autoheader
+   Using meson to Build open-isns
+   ------------------------------
+   For Open-iSNS, the system is built using meson and ninja
+   (see https://github.com/mesonbuild/meson). If these packages aren't
+   available to you on your Linux distribution, you can download
+   the latest release from: https://github.com/mesonbuild/meson/releases.
+   The README.md file there describes in detail how to build it yourself,
+   including how to get ninja.
 
-For most people, it should be sufficient to run configure without any
-arguments, or at most with the option --prefix. If run without --prefix,
-program files, manpages etc will be installed below /usr/local. To have
-everything installed /usr/bin, /usr/share/man etc, run it as
+   To build the open-isns, first run meson to configure the build,
+   from the top-level open-iscsi directory, e.g.:
 
-	./configure --prefix=/usr
+      rm -rf builddir
+      mkdir builddir
+      meson [<OPTIONS>] setup builddir
+
+   Meson has many options, some built in, and some specifically for
+   this project. To see the built-in options, run:
+
+      meson setup --help
+
+   One option of note is "--default-library={shared,static,both}". The
+   meson default is "shared".
+
+   The project-specific options are set using -D<OPTION>=VALUE. OPTIONS
+   are from. You can use 'meson configure' to see these project options:
+
+      security        feature [check]           use libcrypt for security
+      slp             feature [check]           use Service Location Protocol
+      shared_version  boolean [true]            use library versioning, if
+                                                building a shared library
+      systemddir      string [/usr/lib/systemd] location of systemd files
+      rundir          string [/var/run]         where socket and pidfile go
+
+   Thus, one might run:
+
+      meson setup --default-library=both -Dsecurity=disabled -Drundir=/some/dir
+
+   Once meson has created and set up your "builddir" directory, you can
+   actually build the code using ninja:
+
+           ninja -C builddir [--verbose]
+
+   Using autotools/make to Build open-isns [DEPRECATED]
+   ----------------------------------------------------
+   The Open-iSNS can still be build using autoconf, though this
+   method is deprected and will be removed soon. The distributed tarball
+   should include a configure script and a config.h.in file generated
+   from configure.ac. If these are missing, you can generate them
+   by running
+
+        autoconf
+        autoheader
+
+   For most people, it should be sufficient to run configure without any
+   arguments, or at most with the option --prefix. If run without --prefix,
+   program files, manpages etc will be installed below /usr/local. To have
+   everything installed /usr/bin, /usr/share/man etc, run it as
+
+        ./configure --prefix=/usr
+
+   Other project-specific options to configure include:
+
+        --without-security      to disable security
+        --without-slp           to disable Service Location Protocol
+        --with-rundir=/path     to set the run directory [/var/run]
+        --enable-shared         enabled building shared library
+        --disable-static        disable building the static library
+        --enable-memdebug       defined -DMEMDEBUG when compiling (deprecated)
+
+   When configure is run, it checks for the presence of a number of
+   headers and libraries in your system (the results of most of these checks
+   are currently ignored). Then, it creates a Makefile and a config.h
+   include file. With these in place, you can build the binaries and libraries:
+
+           make
+           make install
+
+   Then, run "make clean" to clean up your binaries, or run "make distclean"
+   to get back to a clean pre-configuration state.
 
 Dependencies:
 
- -	If you want to build Open-iSNS with support for authentication,
- 	you need the OpenSSL libraries and header files installed.
+ -      If you want to build Open-iSNS with support for authentication,
+        you need the OpenSSL libraries and header files installed.
 
-	The configure script should pick up the presence of these
-	libraries, and enable security support automatically. To disable
-	this explicitly in your build, pass the --without-security option
-	to configure.
+ -      If you want to build Open-iSNS with SLP support, you need the
+        OpenSLP library and header file installed.
 
- -	If you want to build Open-iSNS with SLP support, you need the
- 	OpenSLP library and header file installed.
-
-	The configure script should pick up the presence of this library,
-	and enable SLP support automatically. To disable this explicitly
-	in your build, pass the --without-slp option to configure.
-
-When configure is run, it checks for a the presence of a number of
-headers and libraries in your system (the results of most of these checks
-are currently ignored :-). Then, it creates a Makefile and a config.h
-include file. With these in place, you can build the binaries and libraries:
-
-	make
-	make install
-
-Then, run "make clean" to clean up your binaries, or run "make distclean"
-to get back to a clean pre-configuration state.
 
 
 Testing
@@ -133,12 +185,13 @@ On the iSNS server, you need to generate a server key and install it. The
 simplest way is probably to use the isnssetup script included in the
 source package.
 
-For each client you wish to use, you should then 
+For each client you wish to use, you should then register that key using
+the example setup script, or steps similar to those in the script.
 
 iSNS Security
 -------------
 
-This implementation of iSNS supports authentication, as descibed in RFC
+This implementation of iSNS supports authentication, as described in RFC
 4171. In order to use it, you have to create DSA keys for the server and
 all clients.
 
@@ -158,11 +211,11 @@ Downloading Open-iSNS
 
 Open-iSNS is available for download from:
 
-	https://github.com/gonzoleeman/open-isns/archive/$(VERSION).tar.gz
+        https://github.com/open-iscsi/open-isns/archive/$(VERSION).tar.gz
 
-or, in souce form, from:
+or, in source form, from:
 
-	git@github.com:gonzoleeman/open-isns.git
+        https://github.com/open-iscsi/open-isns
 
 You have to grab the latest tarball and compile it; fancy things such
 as RPMs are not available yet.
@@ -170,32 +223,32 @@ as RPMs are not available yet.
 ------------------------------------------------------------------
 
 
-			COPYRIGHT NOTICE
+                        COPYRIGHT NOTICE
 
-	Copyright (C) 2007 Olaf Kirch.
+        Copyright (C) 2007 Olaf Kirch.
 
-	This library is free software; you can redistribute it and/or
-	modify it under the terms of the GNU Lesser General Public
-	License as published by the Free Software Foundation; either
-	version 2.1 of the License, or (at your option) any later version.
+        This library is free software; you can redistribute it and/or
+        modify it under the terms of the GNU Lesser General Public
+        License as published by the Free Software Foundation; either
+        version 2.1 of the License, or (at your option) any later version.
 
-	This library is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-	Lesser General Public License for more details.
+        This library is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+        Lesser General Public License for more details.
 
-	You should have received a copy of the GNU Lesser General Public
-	License along with this library; if not, write to the Free Software
-	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-	02110-1301 USA.
+        You should have received a copy of the GNU Lesser General Public
+        License along with this library; if not, write to the Free Software
+        Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+        02110-1301 USA.
 
 ------------------------------------------------------------------
 
 Author:
-	Olaf Kirch <okir@suse.com>
+        Olaf Kirch <okir@suse.com>
 
 Current maintainer:
-	Lee Duncan <lduncan@suse.com>		2015
+        Lee Duncan <lduncan@suse.com>           (since 2015)
 
 ------------------------------------------------------------------
 
@@ -203,6 +256,7 @@ Things to do:
 
 * fully implement/require device discovery sets
 * implement ability to pass in flags to systemd service file for isnsd
-* improve automated testing (using PyUnit?)
 * ensure all tests pass (!!)
-* document testing procedure
+* document testing procedure better
+* remove the old perl-based tests
+* fix testing using meson

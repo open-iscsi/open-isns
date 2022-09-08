@@ -621,6 +621,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+VERSION
 RUNDIR
 ENABLE_STATIC
 ENABLE_SHARED
@@ -4472,6 +4473,8 @@ $as_echo "$as_me: WARNING: *** You have not enabled versioned symbols." >&2;}
 
 fi
 
+VERSION=0.101
+
 
 
 
@@ -5758,3 +5761,6 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Autotool/configure/make are deprecated, and will be removed soon. Please using \"meson\" instead" >&5
+$as_echo "$as_me: WARNING: Autotool/configure/make are deprecated, and will be removed soon. Please using \"meson\" instead" >&2;}
