@@ -1171,6 +1171,20 @@ isns_attr_type_t isns_attr_type_nil = {
  * Attribute type UINT32
  */
 static int
+isns_attr_type_uint32_match(const isns_value_t *a, const isns_value_t *b)
+{
+	return a->iv_uint32 == b->iv_uint32;
+}
+
+static int
+isns_attr_type_uint32_compare(const isns_value_t *a, const isns_value_t *b)
+{
+	uint32_t av = a->iv_uint32;
+	uint32_t bv = b->iv_uint32;
+	return av > bv ? 1 : (av == bv ? 0 : -1);
+}
+
+static int
 isns_attr_type_uint32_encode(buf_t *bp, const isns_value_t *value)
 {
 	return buf_put32(bp, 4) && buf_put32(bp, value->iv_uint32);
@@ -1199,6 +1213,12 @@ isns_attr_type_uint32_parse(isns_value_t *value, const char *string)
 	return *end == '\0';
 }
 
+static int
+isns_attr_type_int32_compare(const isns_value_t *a, const isns_value_t *b)
+{
+	return a->iv_int32 - b->iv_int32;
+}
+
 static void
 isns_attr_type_int32_print(const isns_value_t *value, char *buf, size_t size)
 {
@@ -1217,6 +1237,8 @@ isns_attr_type_int32_parse(isns_value_t *value, const char *string)
 isns_attr_type_t isns_attr_type_uint32 = {
 	.it_id		= ISNS_ATTR_TYPE_UINT32,
 	.it_name	= "uint32",
+	.it_match	= isns_attr_type_uint32_match,
+	.it_compare	= isns_attr_type_uint32_compare,
 	.it_encode	= isns_attr_type_uint32_encode,
 	.it_decode	= isns_attr_type_uint32_decode,
 	.it_print	= isns_attr_type_uint32_print,
@@ -1226,6 +1248,8 @@ isns_attr_type_t isns_attr_type_uint32 = {
 isns_attr_type_t isns_attr_type_int32 = {
 	.it_id		= ISNS_ATTR_TYPE_INT32,
 	.it_name	= "int32",
+	.it_match	= isns_attr_type_uint32_match,
+	.it_compare	= isns_attr_type_int32_compare,
 	.it_encode	= isns_attr_type_uint32_encode,
 	.it_decode	= isns_attr_type_uint32_decode,
 	.it_print	= isns_attr_type_int32_print,
@@ -1267,6 +1291,8 @@ isns_attr_type_range16_print(const isns_value_t *value, char *buf, size_t size)
 isns_attr_type_t isns_attr_type_range16 = {
 	.it_id		= ISNS_ATTR_TYPE_RANGE16,
 	.it_name	= "range16",
+	.it_match	= isns_attr_type_uint32_match,
+	.it_compare	= isns_attr_type_uint32_compare,
 	.it_encode	= isns_attr_type_range16_encode,
 	.it_decode	= isns_attr_type_range16_decode,
 	.it_print	= isns_attr_type_range16_print,
@@ -1277,6 +1303,20 @@ isns_attr_type_t isns_attr_type_range16 = {
 /*
  * 64bit integers
  */
+static int
+isns_attr_type_uint64_match(const isns_value_t *a, const isns_value_t *b)
+{
+	return a->iv_uint64 == b->iv_uint64;
+}
+
+static int
+isns_attr_type_uint64_compare(const isns_value_t *a, const isns_value_t *b)
+{
+	uint64_t av = a->iv_uint64;
+	uint64_t bv = b->iv_uint64;
+	return av > bv ? 1 : (av == bv ? 0 : -1);
+}
+
 static int
 isns_attr_type_uint64_encode(buf_t *bp, const isns_value_t *value)
 {
@@ -1309,6 +1349,8 @@ isns_attr_type_uint64_parse(isns_value_t *value, const char *string)
 isns_attr_type_t isns_attr_type_uint64 = {
 	.it_id		= ISNS_ATTR_TYPE_UINT64,
 	.it_name	= "uint64",
+	.it_match	= isns_attr_type_uint64_match,
+	.it_compare	= isns_attr_type_uint64_compare,
 	.it_encode	= isns_attr_type_uint64_encode,
 	.it_decode	= isns_attr_type_uint64_decode,
 	.it_print	= isns_attr_type_uint64_print,
@@ -1473,6 +1515,8 @@ isns_attr_type_ipaddr_parse(isns_value_t *value, const char *string)
 isns_attr_type_t isns_attr_type_ipaddr = {
 	.it_id		= ISNS_ATTR_TYPE_IPADDR,
 	.it_name	= "ipaddr",
+	.it_match	= isns_attr_type_uint32_match,
+	.it_compare	= isns_attr_type_uint32_compare,
 	.it_encode	= isns_attr_type_ipaddr_encode,
 	.it_decode	= isns_attr_type_ipaddr_decode,
 	.it_print	= isns_attr_type_ipaddr_print,
