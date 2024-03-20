@@ -7,6 +7,7 @@
 #ifndef ISNS_ATTRS_H
 #define ISNS_ATTRS_H
 
+#include <memory.h>
 #include <netinet/in.h>
 #include <libisns/buffer.h>
 #include <libisns/isns.h>
@@ -53,9 +54,13 @@ typedef struct isns_value {
 
 #define __ISNS_ATTRTYPE(type)	isns_attr_type_##type
 #define __ISNS_MEMBER(type)	iv_##type
-#define ISNS_VALUE_INIT(type, value) \
-	(isns_value_t) { .iv_type = &__ISNS_ATTRTYPE(type), \
-		         { .__ISNS_MEMBER(type) = (value) } }
+#define ISNS_VALUE_INIT(type, value) ({	\
+	isns_value_t __v;				\
+	memset(&__v, 0, sizeof(__v));		\
+	__v.iv_type = &__ISNS_ATTRTYPE(type);	\
+	__v.__ISNS_MEMBER(type) = (value);		\
+	__v;		\
+})
 
 #define isns_attr_initialize(attrp, tag, type, value) do { \
 		isns_attr_t *__attr = (attrp);		\
