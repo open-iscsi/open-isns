@@ -46,13 +46,17 @@ sanitize_format(const char *fmt)
 		return fmt;
 
 	strcpy(__fmt, fmt);
-	while (len-- && __fmt[len] == '\n')
-		__fmt[len] = '\0';
-
-	while (len) {
+	while (len > 0) {
+		len = len - 1;
+		if (__fmt[len] == '\n')
+			__fmt[len] = '\0';
+		else
+			break;
+	}
+	while (len > 0) {
+		len = len - 1;
 		if (__fmt[len] == '\n')
 			__fmt[len] = ' ';
-		--len;
 	}
 
 	return __fmt;
