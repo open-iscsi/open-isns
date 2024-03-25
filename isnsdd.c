@@ -318,8 +318,8 @@ isns_proxy_free(isns_proxy_t *proxy)
 {
 	isns_proxy_erase(proxy);
 	isns_list_del(&proxy->ip_list);
-	free(&proxy->ip_eid);
-	free(proxy);
+	isns_free(proxy->ip_eid);
+	isns_free(proxy);
 }
 
 /*
