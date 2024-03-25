@@ -55,8 +55,10 @@ print_size(unsigned long size)
 	static char	unit[] = "-kMG";
 	static char	buffer[64];
 	unsigned int	power = 0;
+	/* allow size to be divided 3 times at most (k,M,G) */
+	unsigned int	max_loops = 3;
 
-	while (size && !(size % 1024) && power < sizeof(unit)) {
+	while (size && !(size % 1024) && power < max_loops) {
 		size /= 1024;
 		power++;
 	}
