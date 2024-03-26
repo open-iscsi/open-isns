@@ -630,8 +630,8 @@ query_objects(isns_client_t *clnt, int argc, char **argv)
 	}
 
 	isns_object_list_print(&objects, isns_print_stdout);
-	isns_object_list_destroy(&objects);
 out:
+	isns_object_list_destroy(&objects);
 	isns_simple_free(qry);
 	return status;
 }
@@ -687,9 +687,8 @@ query_entity_id(isns_client_t *clnt, int argc, char **argv)
 		printf("%s\n", eid);
 		status = ISNS_SUCCESS;
 	}
-
-	isns_object_list_destroy(&objects);
 out:
+	isns_object_list_destroy(&objects);
 	isns_simple_free(qry);
 	return status;
 }
@@ -857,7 +856,7 @@ deregister_objects(isns_client_t *clnt, int argc, char **argv)
 	if (status != ISNS_SUCCESS) {
 		isns_error("Deregistration failed: %s\n",
 				isns_strerror(status));
-		return status;
+		goto out;
 	}
 
 #if 0
@@ -870,9 +869,9 @@ deregister_objects(isns_client_t *clnt, int argc, char **argv)
 	isns_object_list_print(&objects, isns_print_stdout);
 #endif
 
+out:
 	isns_object_list_destroy(&objects);
 	isns_simple_free(dereg);
-
 	return status;
 }
 
@@ -920,7 +919,7 @@ register_domain(isns_client_t *clnt, int argc, char **argv)
 	if (status != ISNS_SUCCESS) {
 		isns_error("Registration failed: %s\n",
 				isns_strerror(status));
-		return status;
+		goto out;
 	}
 
 	if (status == ISNS_SUCCESS) {
@@ -929,8 +928,8 @@ register_domain(isns_client_t *clnt, int argc, char **argv)
 				isns_simple_get_attrs(msg),
 				isns_print_stdout);
 	}
+out:
 	isns_simple_free(msg);
-
 	return status;
 }
 
@@ -977,9 +976,9 @@ deregister_domain(isns_client_t *clnt, int argc, char **argv)
 	if (status != ISNS_SUCCESS) {
 		isns_error("Deregistration failed: %s\n",
 				isns_strerror(status));
-		return status;
+		goto out;
 	}
-
+out:
 	isns_simple_free(msg);
 	return status;
 }
