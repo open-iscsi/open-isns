@@ -793,6 +793,7 @@ list_objects(isns_client_t *clnt, int argc, char **argv)
 		isns_simple_free(simp);
 		simp = followup;
 	}
+	isns_simple_free(simp);
 
 	if (status == ISNS_SOURCE_UNAUTHORIZED
 	 && query_type == &isns_policy_template
