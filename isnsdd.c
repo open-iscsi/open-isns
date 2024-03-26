@@ -721,7 +721,6 @@ register_exported_objects(isns_client_t *clnt)
 	isns_portal_info_t portal_info;
 	isns_object_list_t entities = ISNS_OBJECT_LIST_INIT;
 	isns_object_list_t portals = ISNS_OBJECT_LIST_INIT;
-	isns_simple_t	*call = NULL;
 	int		status, with_esi;
 	unsigned int	i, my_port;
 	isns_list_t	old_proxies;
@@ -784,6 +783,7 @@ register_exported_objects(isns_client_t *clnt)
 	}
 
 	for (i = 0; i < local_registry.iol_count; ++i) {
+		isns_simple_t	*call = NULL;
 		isns_object_t *obj = local_registry.iol_data[i];
 		isns_source_t *source;
 		int	status;
@@ -802,11 +802,11 @@ register_exported_objects(isns_client_t *clnt)
 					isns_strerror(status));
 		}
 		isns_source_release(source);
+		if (call)
+			isns_simple_free(call);
 	}
 
 out:
-	if (call)
-		isns_simple_free(call);
 	isns_object_list_destroy(&entities);
 	isns_object_list_destroy(&portals);
 	return status;
