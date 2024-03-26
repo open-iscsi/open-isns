@@ -2306,8 +2306,10 @@ isns_get_address(struct sockaddr_storage *result,
 		return -1;
 
 	alen = ai->ai_addrlen;
-	if (alen > (int)sizeof(*result))
+	if (alen > (int)sizeof(*result)) {
+		release_addrinfo(ai);
 		return -1;
+	}
 	memcpy(result, ai->ai_addr, alen);
 	release_addrinfo(ai);
 	return alen;
