@@ -621,6 +621,7 @@ rebuild_proxy_list(isns_object_list_t *entities, isns_list_t *old_list)
 		if (node == NULL) {
 			isns_warning("Service %s did not register any "
 				     "storage nodes - skipped\n", eid);
+			isns_proxy_free(proxy);
 			continue;
 		}
 
