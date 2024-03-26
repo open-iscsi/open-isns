@@ -619,20 +619,20 @@ query_objects(isns_client_t *clnt, int argc, char **argv)
 	status = isns_client_call(clnt, &qry);
 	if (status != ISNS_SUCCESS) {
 		isns_error("Query failed: %s\n", isns_strerror(status));
-		return status;
+		goto out;
 	}
 
 	status = isns_query_response_get_objects(qry, &objects);
 	if (status) {
 		isns_error("Unable to extract object list from query response: %s\n",
 				isns_strerror(status), status);
-		return status;
+		goto out;
 	}
 
 	isns_object_list_print(&objects, isns_print_stdout);
 	isns_object_list_destroy(&objects);
+out:
 	isns_simple_free(qry);
-
 	return status;
 }
 
@@ -664,14 +664,14 @@ query_entity_id(isns_client_t *clnt, int argc, char **argv)
 	status = isns_client_call(clnt, &qry);
 	if (status != ISNS_SUCCESS) {
 		isns_error("Query failed: %s\n", isns_strerror(status));
-		return status;
+		goto out;
 	}
 
 	status = isns_query_response_get_objects(qry, &objects);
 	if (status) {
 		isns_error("Unable to extract object list from query response: %s\n",
 				isns_strerror(status), status);
-		return status;
+		goto out;
 	}
 
 	status = ISNS_NO_SUCH_ENTRY;
@@ -689,8 +689,8 @@ query_entity_id(isns_client_t *clnt, int argc, char **argv)
 	}
 
 	isns_object_list_destroy(&objects);
+out:
 	isns_simple_free(qry);
-
 	return status;
 }
 
