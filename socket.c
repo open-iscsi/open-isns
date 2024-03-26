@@ -161,6 +161,7 @@ isns_msg_complete(struct isns_partial_msg *msg)
 		buf_free(bp);
 	}
 
+	buf_free(msg_buf);
 	return 0;
 }
 
