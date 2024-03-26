@@ -360,6 +360,7 @@ refresh_registration(void *ptr)
 	status = isns_simple_call(clnt->ic_socket, &qry);
 	if (status != ISNS_SUCCESS) {
 		isns_error("Query failed: %s\n", isns_strerror(status));
+		isns_simple_free(qry);
 		goto re_register;
 	}
 
