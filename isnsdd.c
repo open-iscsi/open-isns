@@ -589,12 +589,12 @@ __add_release_object(isns_object_list_t *objects, isns_object_t *cur)
 void
 rebuild_proxy_list(isns_object_list_t *entities, isns_list_t *old_list)
 {
-	isns_proxy_t	*proxy;
 	unsigned int	i;
 
 	isns_list_move(old_list, &proxies);
 
 	for (i = 0; i < entities->iol_count; ++i) {
+		isns_proxy_t	*proxy;
 		isns_object_t	*entity = entities->iol_data[i];
 		isns_object_t	*node;
 		const char	*eid;
