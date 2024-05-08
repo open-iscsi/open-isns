@@ -318,8 +318,8 @@ isns_proxy_free(isns_proxy_t *proxy)
 {
 	isns_proxy_erase(proxy);
 	isns_list_del(&proxy->ip_list);
-	free(&proxy->ip_eid);
-	free(proxy);
+	isns_free(proxy->ip_eid);
+	isns_free(proxy);
 }
 
 /*
@@ -360,6 +360,7 @@ refresh_registration(void *ptr)
 	status = isns_simple_call(clnt->ic_socket, &qry);
 	if (status != ISNS_SUCCESS) {
 		isns_error("Query failed: %s\n", isns_strerror(status));
+		isns_simple_free(qry);
 		goto re_register;
 	}
 
@@ -588,12 +589,12 @@ __add_release_object(isns_object_list_t *objects, isns_object_t *cur)
 void
 rebuild_proxy_list(isns_object_list_t *entities, isns_list_t *old_list)
 {
-	isns_proxy_t	*proxy;
 	unsigned int	i;
 
 	isns_list_move(old_list, &proxies);
 
 	for (i = 0; i < entities->iol_count; ++i) {
+		isns_proxy_t	*proxy;
 		isns_object_t	*entity = entities->iol_data[i];
 		isns_object_t	*node;
 		const char	*eid;
@@ -620,6 +621,7 @@ rebuild_proxy_list(isns_object_list_t *entities, isns_list_t *old_list)
 		if (node == NULL) {
 			isns_warning("Service %s did not register any "
 				     "storage nodes - skipped\n", eid);
+			isns_proxy_free(proxy);
 			continue;
 		}
 
@@ -720,7 +722,6 @@ register_exported_objects(isns_client_t *clnt)
 	isns_portal_info_t portal_info;
 	isns_object_list_t entities = ISNS_OBJECT_LIST_INIT;
 	isns_object_list_t portals = ISNS_OBJECT_LIST_INIT;
-	isns_simple_t	*call = NULL;
 	int		status, with_esi;
 	unsigned int	i, my_port;
 	isns_list_t	old_proxies;
@@ -783,6 +784,7 @@ register_exported_objects(isns_client_t *clnt)
 	}
 
 	for (i = 0; i < local_registry.iol_count; ++i) {
+		isns_simple_t	*call = NULL;
 		isns_object_t *obj = local_registry.iol_data[i];
 		isns_source_t *source;
 		int	status;
@@ -801,11 +803,11 @@ register_exported_objects(isns_client_t *clnt)
 					isns_strerror(status));
 		}
 		isns_source_release(source);
+		if (call)
+			isns_simple_free(call);
 	}
 
 out:
-	if (call)
-		isns_simple_free(call);
 	isns_object_list_destroy(&entities);
 	isns_object_list_destroy(&portals);
 	return status;

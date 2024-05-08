@@ -167,8 +167,10 @@ isns_create_getnext_response(isns_source_t *source,
 	 * I *think* this means the key attributes of the object
 	 * we matched.
 	 */
-	if (!isns_object_get_key_attrs(obj, &resp->is_message_attrs))
+	if (!isns_object_get_key_attrs(obj, &resp->is_message_attrs)) {
+		isns_simple_free(resp);
 		return NULL;
+	}
 
 	/*
 	 * 5.7.5.3.

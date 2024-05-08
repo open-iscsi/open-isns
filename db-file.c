@@ -144,10 +144,13 @@ __dbe_mkdir_path(const char *dirname)
 		copy[len] = '/';
 
 		/* and try to create the directory */
-		if (mkdir(copy, 0700) < 0)
+		if (mkdir(copy, 0700) < 0) {
+			isns_free(copy);
 			return -1;
+		}
 	}
 
+	isns_free(copy);
 	return 0;
 }
 
