@@ -6,8 +6,7 @@ option('security', type: 'feature', value: 'auto',
 option('slp', type: 'feature', value: 'auto',
   description: 'enable use of Service Location Protocol')
 
-# disable shared library creation and enable static library
-# creation, by default
+# use libisns.vers for versioning, when building shared library
 option('shared_version', type: 'boolean', value: true,
   description: 'use library versioning on the shared library')
 

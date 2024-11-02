@@ -1,22 +1,21 @@
 
 Welcome to Open-iSNS
 ====================
-
 This is a partial implementation of iSNS, according to RFC4171.
 The implementation is still somewhat incomplete, but I'm releasing
 it for your reading pleasure.
 
 The distribution comprises:
 
- isnsd
+* isnsd
         This is the iSNS server, supporting persistent storage
         of registrations in a file based database.
 
- isnsadm
+* isnsadm
         A command line utility for querying the iSNS database,
         and for registering/deregistering nodes and portals
 
- isnsdd
+* isnsdd
         An iSNS Discovery Daemon, which is still very much work
         in progress. The daemon is supposed to handle all the
         bit banging and server communications required to register
@@ -28,14 +27,12 @@ The distribution comprises:
 
 Thanks!
 -------
-
 Many thanks to Albert Pauw for his fearless testing of snapshots,
 and his copious feedback!
 
 
 What works, after a fashion:
 ----------------------------
-
  -      For now, I've been focusing on getting the iSCSI part to
         work. There is some very basic support for FC objects, but
         this will be hardly useful yet.
@@ -62,108 +59,68 @@ What works, after a fashion:
 
  -      SCN, supported by the server and the discovery daemon
 
-
 What is still missing
 ---------------------
-
  -      Better documentation (esp. a HOWTO on getting started with iSNS)
  -      DD Sets
  -      Various bits and pieces of the protocol
  -      FC support
 
-
-
 Building Open-iSNS
 ------------------
+Meson is now the only build system, as the old
+autoconf files have been removed.
 
-Currently we are transitioning to using 'meson' instead of
-autotools/autoconf. This means that, for now, both systems
-work. But autoconf will be deprecated, so please start using
-meson.
+Using meson to Build open-isns
+------------------------------
+For Open-iSNS, the system is built using meson and ninja
+(see https://github.com/mesonbuild/meson). If these packages aren't
+available to you on your Linux distribution, you can download
+the latest release from: https://github.com/mesonbuild/meson/releases.
+The README.md file there describes in detail how to build it yourself,
+including how to get ninja.
 
-   Using meson to Build open-isns
-   ------------------------------
-   For Open-iSNS, the system is built using meson and ninja
-   (see https://github.com/mesonbuild/meson). If these packages aren't
-   available to you on your Linux distribution, you can download
-   the latest release from: https://github.com/mesonbuild/meson/releases.
-   The README.md file there describes in detail how to build it yourself,
-   including how to get ninja.
+To build the open-isns, first run meson to configure the build,
+from the top-level open-iscsi directory, e.g.:
 
-   To build the open-isns, first run meson to configure the build,
-   from the top-level open-iscsi directory, e.g.:
+    rm -rf builddir
+    mkdir builddir
+    meson [<OPTIONS>] setup builddir
 
-      rm -rf builddir
-      mkdir builddir
-      meson [<OPTIONS>] setup builddir
+Meson has many options, some built in, and some specifically for
+this project. To see the built-in options, run:
 
-   Meson has many options, some built in, and some specifically for
-   this project. To see the built-in options, run:
+    meson setup --help
 
-      meson setup --help
+One option of note is "--default-library={shared,static,both}". The
+meson default is "shared".
 
-   One option of note is "--default-library={shared,static,both}". The
-   meson default is "shared".
+The project-specific options are set using -D<OPTION>=VALUE. OPTIONS
+are from. You can use 'meson configure' to see these project options:
 
-   The project-specific options are set using -D<OPTION>=VALUE. OPTIONS
-   are from. You can use 'meson configure' to see these project options:
+   security        feature [check]           use libcrypt for security
+   slp             feature [check]           use Service Location Protocol
+   shared_version  boolean [true]            use library versioning, if
+                                             building a shared library
+   systemddir      string [/usr/lib/systemd] location of systemd files
+   rundir          string [/var/run]         where socket and pidfile go
+   enable-mdebug   boolean [false]           Enable memory debugging
 
-      security        feature [check]           use libcrypt for security
-      slp             feature [check]           use Service Location Protocol
-      shared_version  boolean [true]            use library versioning, if
-                                                building a shared library
-      systemddir      string [/usr/lib/systemd] location of systemd files
-      rundir          string [/var/run]         where socket and pidfile go
+Thus, one might run:
 
-   Thus, one might run:
+    meson setup --default-library=both -Dsecurity=disabled -Drundir=/some/dir
 
-      meson setup --default-library=both -Dsecurity=disabled -Drundir=/some/dir
+Once meson has created and set up your "builddir" directory, you can
+actually build the code using ninja:
 
-   Once meson has created and set up your "builddir" directory, you can
-   actually build the code using ninja:
+    ninja -C builddir [--verbose]
 
-           ninja -C builddir [--verbose]
-
-   Using autotools/make to Build open-isns [DEPRECATED]
-   ----------------------------------------------------
-   The Open-iSNS can still be build using autoconf, though this
-   method is deprected and will be removed soon. The distributed tarball
-   should include a configure script and a config.h.in file generated
-   from configure.ac. If these are missing, you can generate them
-   by running
-
-        autoconf
-        autoheader
-
-   For most people, it should be sufficient to run configure without any
-   arguments, or at most with the option --prefix. If run without --prefix,
-   program files, manpages etc will be installed below /usr/local. To have
-   everything installed /usr/bin, /usr/share/man etc, run it as
-
-        ./configure --prefix=/usr
-
-   Other project-specific options to configure include:
-
-        --without-security      to disable security
-        --without-slp           to disable Service Location Protocol
-        --with-rundir=/path     to set the run directory [/var/run]
-        --enable-shared         enabled building shared library
-        --disable-static        disable building the static library
-        --enable-memdebug       defined -DMEMDEBUG when compiling (deprecated)
-
-   When configure is run, it checks for the presence of a number of
-   headers and libraries in your system (the results of most of these checks
-   are currently ignored). Then, it creates a Makefile and a config.h
-   include file. With these in place, you can build the binaries and libraries:
-
-           make
-           make install
-
-   Then, run "make clean" to clean up your binaries, or run "make distclean"
-   to get back to a clean pre-configuration state.
+Note: for testing purposes, you need to use "builddir", and not some other
+directory name, since the python tests, in the "tests" subdirectory, expect
+the binaries to be there.
 
 Dependencies:
-
+-------------
  -      If you want to build Open-iSNS with support for authentication,
         you need the OpenSSL libraries and header files installed.
 
@@ -174,13 +131,14 @@ Dependencies:
 
 Testing
 -------
-
 See the README in the tests subdirectory for information on running
-the isnsd selftests.
+the isnsd selftests. You can run them from the main directory, if
+you wish, as root, using:
+
+    # ninja -C builddir test
 
 Getting started
 ---------------
-
 On the iSNS server, you need to generate a server key and install it. The
 simplest way is probably to use the isnssetup script included in the
 source package.
@@ -190,7 +148,6 @@ the example setup script, or steps similar to those in the script.
 
 iSNS Security
 -------------
-
 This implementation of iSNS supports authentication, as described in RFC
 4171. In order to use it, you have to create DSA keys for the server and
 all clients.
@@ -208,7 +165,6 @@ the EXAMPLES section of the isnsadm(8) manual page.
 
 Downloading Open-iSNS
 ---------------------
-
 Open-iSNS is available for download from:
 
         https://github.com/open-iscsi/open-isns/archive/$(VERSION).tar.gz
@@ -253,10 +209,7 @@ Current maintainer:
 ------------------------------------------------------------------
 
 Things to do:
-
+-------------
 * fully implement/require device discovery sets
 * implement ability to pass in flags to systemd service file for isnsd
-* ensure all tests pass (!!)
-* document testing procedure better
-* remove the old perl-based tests
-* fix testing using meson
+* ensure all tests pass with security

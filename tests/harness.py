@@ -13,9 +13,10 @@ import time
 # globals
 #
 class Global:
-    _isns_test_base = '/tmp/isns-test'
-    _isns_test_dir = '/tmp/isns-test/test'
-    _isns_bin_dir = '..'
+    # tmp directories where the tests will be run
+    _isns_test_base_path = '/tmp/isns-test'
+    _isns_test_path = '/tmp/isns-test/test'
+    # various attributes
     _isns_test_dump = None
     _isns_test_data = None
     _isns_seq = 0
@@ -26,10 +27,15 @@ class Global:
 
     _isns_ignore_tags = ['0004', '0603v']
 
-    verbosity = 1
-    security = True
-    debug = False
+    # where the tests are relative to where we start them from
+    # default to "current directory"
+    test_dir = '.'
+    # for locating binaries under test_dir (FIXME: should be a command-line option?)
+    isns_bin_dir = '../builddir'
 
+    verbosity = 1
+    security = False
+    debug = False
 
 def dprint(*args):
     """
@@ -45,22 +51,21 @@ def vprint(*args):
     """
     Print a verbose message
     """
-    if Global.verbosity > 1 and args:
+    if Global.verbosity > 0 and args:
         for arg in args:
             print(arg, end='')
         print('')
 
-def notice(*args):
+def get_bindir():
     """
-    Print if not in quiet mode -- NOT USED?
+    return the directory where binaries live
     """
-    if Global.verbosity > 0:
-        for arg in args:
-            print(arg, end='')
-        print('')
+    return '%s/%s' % (Global.test_dir, Global.isns_bin_dir)
 
 def isns_stage(name, msg):
-    # gaurd against duplicate stage names, since data files are named, based on them
+    """
+    gaurd against duplicate stage names, since data files are named, based on them
+    """
     if name in Global._isns_stage_names:
         print('internal error: duplicate stage name: %s\n' % name, file=sys.stderr)
         sys.exit(1)
@@ -69,21 +74,21 @@ def isns_stage(name, msg):
     vprint('*** Stage %s: %s ***' % (name, msg))
 
 def set_up_test(test_name, security=None):
-    Global._isns_test_dir = '%s/%s' % (Global._isns_test_base, test_name)
-    Global._isns_test_dump = '%s/dump' % Global._isns_test_dir
-    Global._isns_test_data = 'data/%s' % test_name
+    Global._isns_test_path = '%s/%s' % (Global._isns_test_base_path, test_name)
+    Global._isns_test_dump = '%s/dump' % Global._isns_test_path
+    Global._isns_test_data = '%s/data/%s' % (Global.test_dir, test_name)
 
-    if Global._isns_test_dir.startswith('/tmp/'):
-        if os.path.isdir(Global._isns_test_dir):
-            shutil.rmtree(Global._isns_test_dir)
+    if Global._isns_test_path.startswith('/tmp/'):
+        if os.path.isdir(Global._isns_test_path):
+            shutil.rmtree(Global._isns_test_path)
 
-    if not os.path.isdir(Global._isns_test_dir):
-        os.makedirs(Global._isns_test_dir, 0o755)
+    if not os.path.isdir(Global._isns_test_path):
+        os.makedirs(Global._isns_test_path, 0o755)
     if not os.path.isdir(Global._isns_test_dump):
         os.mkdir(Global._isns_test_dump, 0o755)
 
     if security is not None:
-        dprint("Setting security to", security)
+        dprint("Setting security=", security)
         Global.security = security
 
     # start clean
@@ -137,6 +142,12 @@ def new_initArgParsers(self):
     self._main_parser.add_argument('-d', '--debug', dest='debug',
             action='store_true',
             help='Enable developer debugging')
+    self._main_parser.add_argument('-l', '--list', dest='list',
+            action='store_true',
+            help='List tests and exit')
+    self._main_parser.add_argument('-D', '--test-dir', dest='test_dir',
+            default='.',
+            help='Sets the test dir (default ".")')
 
 def new_parseArgs(self, argv):
     """
@@ -148,8 +159,12 @@ def new_parseArgs(self, argv):
     Global.verbosity = self.verbosity
     Global.security = self.security
     Global.debug = self.debug
-    dprint("found: verbosity=%d, security=%s" % \
-           (Global.verbosity, Global.security))
+    Global.test_dir = self.test_dir
+    dprint("found: debug=%s, verbosity=%d, security=%s, list=%s, test_dir='%s'" % \
+           (Global.debug, Global.verbosity,
+            Global.security, self.list, self.test_dir))
+    if self.list:
+        self.list_tests()
 
 def setup_testProgram_overrides():
     """
@@ -186,11 +201,12 @@ def build_config(from_config, to_config, local_config):
     build a config file from the from_config, using local_config,
     and creating to_config
     """
-    vprint('*** Building %s -> %s' % (from_config, to_config))
+    from_config_path = '%s/%s' % (Global.test_dir, from_config)
+    vprint('*** Building %s -> %s' % (from_config_path, to_config))
     pat = re.compile(r'(\S+)(\s*=\s*)(\S+)')
     skip_pat = re.compile(r'@[A-Z_]*@')
     result = isns_config(to_config)
-    with open(from_config, 'r') as from_fd:
+    with open(from_config_path, 'r') as from_fd:
         with open(to_config, 'a') as to_fd:
             for line in from_fd:
                 res = pat.match(line.rstrip())
@@ -213,9 +229,10 @@ def create_server(overrides=None):
     """
     Create a server configration instance
     """
+    dprint("create_server: PWD=%s" % os.getcwd())
     handle = 'server%d' % Global._isns_seq
     Global._isns_seq += 1
-    my_dir = '%s/%s' % (Global._isns_test_dir, handle)
+    my_dir = '%s/%s' % (Global._isns_test_path, handle)
     if not os.path.isdir(my_dir):
         os.mkdir(my_dir, 0o755)
     if not os.path.isdir(Global._isns_test_dump):
@@ -251,7 +268,7 @@ def create_client(server_config, client_address=None):
     """
     handle = 'client%d' % Global._isns_seq
     Global._isns_seq += 1
-    my_dir = '%s/%s' % (Global._isns_test_dir, handle)
+    my_dir = '%s/%s' % (Global._isns_test_path, handle)
     if not os.path.isdir(my_dir):
         os.mkdir(my_dir, 0o755)
 
@@ -300,7 +317,7 @@ def isns_start_server(server_config):
 
     vprint('*** Starting server (logging to %s)' % logfile)
 
-    cmd = ['%s/isnsd' % Global._isns_bin_dir,
+    cmd = ['%s/isnsd' % get_bindir(),
            '-c', server_config.path,
            '-f',
            '-d', 'all' ]
@@ -404,18 +421,18 @@ def run_client(client_config, args):
     """
     logfile = get_logfile_from_config(client_config.path)
 
-    cmd = ['%s/isnsadm' % Global._isns_bin_dir,
+    cmd = ['%s/isnsadm' % get_bindir(),
            '-c', client_config.path] + args
     exit_val = run_cmd(cmd, logfile)
     return (logfile, exit_val)
 
 def isns_external_test(client_config, args):
     """
-    Run an external test
+    Run an external test program
     """
     logfile = get_logfile_from_config(client_config.path)
 
-    cmd = ['%s/%s' % (Global._isns_bin_dir, args[0]),
+    cmd = ['%s/%s' % (get_bindir(), args[0]),
            '-c', client_config.path] + args[1:]
     exit_val = run_cmd(cmd, logfile)
     return (logfile, exit_val)
@@ -545,7 +562,7 @@ def verify_db(server_config):
     dump_file = '%s/%s' % (Global._isns_test_dump, stage)
 
     dprint("planning to dump DB to %s" % dump_file)
-    cmd = ['%s/isnsd' % Global._isns_bin_dir,
+    cmd = ['%s/isnsd' % get_bindir(),
            '-c', server_config.path,
            '--dump-db']
     cmd_result = run_cmd(cmd, dump_file)
