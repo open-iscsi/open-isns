@@ -6,6 +6,18 @@
 
 #ifdef MDEBUG
 
+/*
+ * XXX: Note: this memory debugging does not seem to work.
+ * When I enable it, I get an error from __isns_check_chunk that
+ * m_list is corrupted.
+ *
+ * I will leave this code in place now, until it is either fixed
+ * or removed soon (I hope). As it is, you have to jump through
+ * hoops (or edit this file) to enable it, and you have to
+ * set the appropriate environment variable. So don't do that
+ * unless you are expecting false-positive allocation failures.
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <libisns/util.h>
