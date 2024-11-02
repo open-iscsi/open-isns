@@ -14,17 +14,8 @@ the following information may be useful:
 	debug facilities - check out the manpages and/or
 	the source code in logging.c
 
- -	If isnsd crashes, and you suspect memory corruption,
-	you can compile open-isns with memory debugging enabled.  Re-run
-	the configure script and add the option --enable-memdebug. Then
-	run "make clean all" to rebuild everything.
-
-	Memory debugging can be chosen at run-time by setting the
-	ISNS_MDEBUG environment variable, and re-starting the application:
-
-	export ISNS_MDEBUG=1
-	./isnsd -f -d all
-
-	Memory debugging works for all memory allocations done by the
-	Open-iSNS code, but does not affect memory allocations by other
-	libraries (such as glibc or openssl).
+ -	If you want to debug memory issues (crashing, memory leaks, etc),
+ 	there is a memory debuging module (mdebug.c), but it doesn't
+	currently work. So you're on your own. If you figure out
+	something useful, or you get the current mdebug.c file working,
+	please update this file.
