@@ -20,10 +20,15 @@ TODO:
     - Change the tests so that they verify the output directly from each step,
       rather than compare the output to previous runs, which is inherently buggy,
       since we may have saved bad data as a reference. So this method only
-      really catches new bugs.
-    - don't start the tests if an isnsd server is already running. Perhaps we
+      really catches new bugs. (Enhancement)
+    - Don't start the tests if an isnsd server is already running. Perhaps we
       should care about what port it is one? But if a daemon is left running by
       a previous failed test, new tests just mysteriously fail.
+    - Add option to set the "__isns_bin_dir" in harness.py
+    - Add a check in each subtest to ensure the previous subtest was run, so
+      that trying to run just one random subtest will fail, even though allowed
+      by unittest.
+    - Get security working
 """
 
 import sys
@@ -727,7 +732,7 @@ class Test08(unittest.TestCase):
         Run the first external program
         """
         harness.isns_stage('pauw1', 'Run external program pauw1')
-        (res, msg) = harness.isns_external_test(self.client_config, ['tests/pauw1'])
+        (res, msg) = harness.isns_external_test(self.client_config, ['pauw1'])
         self.assertTrue(res, msg)
         (res, msg) = harness.verify_db(self.server_config)
         self.assertTrue(res, msg)
@@ -765,7 +770,7 @@ class Test09(unittest.TestCase):
         Run the second external program
         """
         harness.isns_stage('pauw2', 'Run external program pauw2')
-        (res, msg) = harness.isns_external_test(self.client_config, ['tests/pauw2'])
+        (res, msg) = harness.isns_external_test(self.client_config, ['pauw2'])
         self.assertTrue(res, msg)
         (res, msg) = harness.verify_db(self.server_config)
         self.assertTrue(res, msg)
@@ -807,7 +812,7 @@ class Test10(unittest.TestCase):
         """
         harness.isns_stage('pauw3-1', 'Run external program pauw3 (slow)')
         (res, msg) = harness.isns_external_test(self.client_config,
-                                                ['tests/pauw3', '16'])
+                                                ['pauw3', '16'])
         self.assertTrue(res, msg)
         harness.vprint('*** SUCCESS ***')
 
@@ -827,7 +832,7 @@ class Test10(unittest.TestCase):
         """
         harness.isns_stage('pauw3-2', 'Run external program pauw3 (slow)')
         (res, msg) = harness.isns_external_test(self.client_config,
-                                                ['tests/pauw3', '-n', '16'])
+                                                ['pauw3', '-n', '16'])
         self.assertTrue(res, msg)
         harness.vprint('*** SUCCESS ***')
 
@@ -874,7 +879,7 @@ class Test11(unittest.TestCase):
         Run the second external program
         """
         harness.isns_stage('pauw2', 'Run external program pauw4')
-        (res, msg) = harness.isns_external_test(self.client_config, ['tests/pauw4'])
+        (res, msg) = harness.isns_external_test(self.client_config, ['pauw4'])
         self.assertTrue(res, msg)
         (res, msg) = harness.verify_db(self.server_config)
         self.assertTrue(res, msg)
@@ -884,10 +889,51 @@ class Test11(unittest.TestCase):
     def tearDownClass(cls):
         harness.isns_finish()
 
+# get a list of testcase classes, for listing
+class_names_list=[]
+for n in dir():
+    if n.startswith("Test"):
+        class_names_list.append(n)
+
+def print_test_list_and_exit(verbosity):
+    """
+    print list of all tests
+
+    always print the test cases, and print more if verbosity set
+
+    verbosity       action
+       0 (-1)       print list of test cases
+       1 (default)  add in test case descriptions
+       2 (-v)       add in Subtests and descriptions of them
+    """
+    global class_names_list
+
+    for c in class_names_list:
+        cls = getattr(sys.modules[__name__], c)
+        print("*** Test Case: %s" % cls.__name__, end='')
+        if verbosity > 0:
+            print(cls.__doc__)
+            if verbosity > 1:
+                for m in dir(cls):
+                    if m.startswith("test"):
+                        method_doc = getattr(cls, m).__doc__
+                        print("\t* Test Method: %s: %s" % (m, method_doc.strip()))
+                print()
+        else:
+            print()
+    sys.exit(0)
+
+class MyTestProgram(unittest.TestProgram):
+    """
+    Augment TestProgram by adding a new method, which prints test case info
+    """
+    def list_tests(self):
+        print_test_list_and_exit(harness.Global.verbosity)
 
 if __name__ == '__main__':
     # do our own hackery first, to get access to verbosity, security, etc,
     # as well as add our own command-line options
     harness.setup_testProgram_overrides()
-    # now run the tests
-    unittest.main()
+    # this next step parses args, gathers the tests, runs the tests, and displays
+    # the results
+    MyTestProgram()

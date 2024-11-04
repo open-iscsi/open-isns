@@ -1,14 +1,4 @@
-*.o
 TAGS
 tags
 cscope.files
-isnsadm
-isnsd
-isnsdd
-libisns.a
-libisns*.so*
-Makefile
-config.h
-config.log
-config.status
-autom4te.cache
+.setup*

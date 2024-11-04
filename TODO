@@ -103,6 +103,3 @@ Renaming
 
 Socket code:
  -	impose upper limit on the reassembly buffer
-
-Compilation:
- -      'make depend' does not work

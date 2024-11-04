@@ -145,7 +145,8 @@ executable('isnsadm',
   install: true,
   install_dir: sbin_dir)
 
-# a testing program (not installed, not currently used here)
+# A test program that validates the
+# bitvector library routines
 e = executable('bitvector',
   sources: files('bitvector.c'),
   include_directories: incl_dirs,
@@ -153,18 +154,14 @@ e = executable('bitvector',
   c_args: ['-DTEST'])
 test('test bitvector', e)
 
-# build our test files ??? (FIXME: not working)
-pyunit_test_works = false
-if pyunit_test_works
-  test_progs = []
-  foreach t: tests
-    e = executable(t,
-      sources: files('tests' / t + '.c'),
-      include_directories: incl_dirs,
-      dependencies: our_dependencies)
-    test_progs += e
-  endforeach
-endif
+# test programs used by the unit tests in the tests subdirectory
+# (not to be called directly for testing)
+foreach t: tests
+  e = executable(t,
+    sources: files('tests' / t + '.c'),
+    include_directories: incl_dirs,
+    dependencies: our_dependencies)
+endforeach
 
 #
 # man pages
