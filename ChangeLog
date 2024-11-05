@@ -1,3 +1,35 @@
+* Changes v0.102 to v0.103:
+
+Chris Leech (14):
+      logging: fix segfault on an underflow with an input string of all newlines
+      isns_proxy_free: fix free call on strdup string
+      libisns: fix print_size overrun
+      db mkdir: leak of strdup memory
+      isns_create_getnnext_response: resource leak
+      refresh_registration: resource leak
+      rebuild_proxy_list: move def inside loop to make lifetime clear to static checkers
+      register_exported_objects: move call definition insize loop
+      isns_msg_complete: msg_buf resource leak
+      isns_get_address: free addrinfo on error
+      rebuild_proxy_list: free proxy on error
+      isnsadm: free qry in error paths
+      isnsadm: free simp in list_objects
+      isnsadm: more memleaks in error handling paths
+
+Lee Duncan (8):
+      Quiet a commpiler warning.
+      Testing: remove deprecated perl testing code
+      Remove last remnants of the old Make/configure bulid system
+      Disable broken memory debugging
+      Update HACKING file with memory debuging update
+      Remove old stale TODO item
+      Update the git ignore list for meson
+      Testing: update testing system
+
+客串一回 (1):
+      Fix the bug in compare value
+
+
 * Changes v0.101 to v0.102:
 
 Andrew Sayers (1):

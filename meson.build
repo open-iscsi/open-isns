@@ -1,7 +1,7 @@
 # meson build for open-isns
 
 project('libisns', 'c',
-  version: '0.102',
+  version: '0.103',
   meson_version: '>= 0.54.0',
   license: 'LGPL-2.1-or-later',
   default_options: [
