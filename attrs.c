@@ -1371,6 +1371,7 @@ isns_attr_type_string_decode(buf_t *bp, size_t len, isns_value_t *value)
 	value->iv_string = isns_malloc(len + 1);
 	if (!buf_get(bp, value->iv_string, len)) {
 		isns_free(value->iv_string);
+		value->iv_string = NULL;
 		return 0;
 	}
 	value->iv_string[len] = '\0';
@@ -1546,6 +1547,7 @@ isns_attr_type_opaque_decode(buf_t *bp, size_t len, isns_value_t *value)
 	value->iv_opaque.ptr = isns_malloc(len);
 	if (!buf_get(bp, value->iv_opaque.ptr, len)) {
 		isns_free(value->iv_opaque.ptr);
+		value->iv_opaque.ptr = NULL;
 		return 0;
 	}
 
